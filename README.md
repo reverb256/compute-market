@@ -1,5 +1,10 @@
 # Compute Market
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Nix Flake](https://img.shields.io/badge/Nix-Flake-5277C3?logo=nixos&logoColor=white)](flake.nix)
+[![Built with Nix](https://img.shields.io/badge/Built%20with-Nix-5277C3?logo=nixos)](https://nixos.org)
+
+
 GPU time-slicing system that mines cryptocurrency when idle and stops for gaming. A NixOS-based GPU resource marketplace with auction-based allocation across mining, Kubernetes workloads, Akash Network leases, and gaming.
 
 ## Architecture
