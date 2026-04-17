@@ -35,6 +35,13 @@
           ./modules/mining-desktop-toggle.nix
         ];
       };
+
+      kubernetesModules.default = {
+        imports = [
+          ./kubernetes/mining.nix
+          ./kubernetes/gpu-miners.nix
+        ];
+      };
     }
     // flake-utils.lib.eachSystem supportedSystems (
       system:
