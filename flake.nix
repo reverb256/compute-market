@@ -26,7 +26,7 @@
           ./modules/dual-xmrig.nix
           ./modules/xmrig-proxy.nix
           ./modules/mining-proxy.nix
-          ./modules/gpu-proxy-cpp.nix
+          # gpu-proxy-cpp moved to standalone gpu-proxy flake
 
           # Coordination and monitoring
           ./modules/gaming-mining-coordinator.nix
@@ -46,7 +46,7 @@
     // flake-utils.lib.eachSystem supportedSystems (
       system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = import nixpkgs { inherit system; config.allowUnfree = true; };
       in
       {
         packages = {

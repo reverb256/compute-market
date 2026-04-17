@@ -180,11 +180,11 @@ in
                 resources = {
                   requests = {
                     memory = "4Gi";
-                    cpu = "2";
+                    cpu = "1";
                   };
                   limits = {
                     memory = "8Gi";
-                    cpu = "4";
+                    cpu = "1";
                   };
                 };
                 securityContext.privileged = true;
@@ -269,11 +269,11 @@ in
                 resources = {
                   requests = {
                     memory = "4Gi";
-                    cpu = "2";
+                    cpu = "1";
                   };
                   limits = {
                     memory = "8Gi";
-                    cpu = "4";
+                    cpu = "1";
                   };
                 };
                 securityContext.privileged = true;
@@ -344,11 +344,11 @@ in
                 resources = {
                   requests = {
                     memory = "512Mi";
-                    cpu = "500m";
+                    cpu = "1";
                   };
                   limits = {
                     memory = "2Gi";
-                    cpu = "2";
+                    cpu = "1";
                   };
                 };
                 securityContext.privileged = true;
@@ -419,11 +419,11 @@ in
                 resources = {
                   requests = {
                     memory = "512Mi";
-                    cpu = "500m";
+                    cpu = "1";
                   };
                   limits = {
                     memory = "2Gi";
-                    cpu = "2";
+                    cpu = "1";
                   };
                 };
                 securityContext.privileged = true;
@@ -511,11 +511,11 @@ in
                 resources = {
                   requests = {
                     memory = "2Gi";
-                    cpu = "500m";
+                    cpu = "1";
                   };
                   limits = {
                     memory = "4Gi";
-                    cpu = "2";
+                    cpu = "1";
                   };
                 };
                 securityContext.privileged = true;
@@ -597,8 +597,6 @@ in
                   "--pass=x"
                   "--tls=1"
                   "--devices=1"
-                  "--pl=250"
-                  "--moff=1300"
                   "--apiport=4068"
                 ];
                 env = {
@@ -626,11 +624,11 @@ in
                 resources = {
                   requests = {
                     memory = "4Gi";
-                    cpu = "100m";
+                    cpu = "1";
                   };
                   limits = {
                     memory = "8Gi";
-                    cpu = "1000m";
+                    cpu = "1";
                   };
                 };
               };
