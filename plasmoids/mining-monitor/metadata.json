@@ -1,0 +1,32 @@
+{
+	"KPlugin": {
+		"Authors": [
+			{
+				"Email": "admin@revervos.org",
+				"Name": "Rever-OS Team"
+			}
+		],
+		"Category": "System Information",
+		"Description": "Real-time GPU/CPU mining monitor across cluster nodes via Prometheus",
+		"EnabledByDefault": false,
+		"Icon": "view-statistics",
+		"Id": "org.revervos.mining-monitor",
+		"License": "BSD-3-Clause",
+		"Name": "Mining Monitor",
+		"Version": "1.0.0",
+		"Website": "https://github.com/revervos/mining-monitor"
+	},
+	"X-Plasma-Api": "6.0",
+	"X-Plasma-MainScript": "ui/main.qml",
+	"X-Plasma-Provides": ["org.kde.plasma.systemmonitor"],
+	"X-Plasma-Standalone": true,
+	"X-KDE-FormFactors": ["desktop", "tablet"],
+	"X-KDE-ConfigModule": "",
+	"X-KDE-ServiceTypes": ["Plasma/Applet"],
+	"X-KDE-PluginInfo-Category": "System Information",
+	"X-KDE-PluginInfo-Name": "Mining Monitor",
+	"X-KDE-PluginInfo-EnabledByDefault": false,
+	"X-KDE-PluginInfo-License": "BSD-3-Clause",
+	"X-KDE-PluginInfo-Version": "1.0.0",
+	"X-KDE-PluginInfo-Website": "https://github.com/revervos/mining-monitor"
+}

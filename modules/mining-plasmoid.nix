@@ -8,7 +8,7 @@ let
   cfg = config.programs.mining-plasmoid;
 
   plasmoidName = "org.revervos.mining-monitor";
-  plasmoidSrc = ../../plasmoids/mining-monitor;
+  plasmoidSrc = ../plasmoids/mining-monitor;
 in
 {
   options.programs.mining-plasmoid = {
