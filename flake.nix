@@ -33,7 +33,6 @@
           ./modules/mining-exporter.nix
           ./modules/xmrig-metrics.nix
           ./modules/mining-desktop-toggle.nix
-          ./modules/mining-plasmoid.nix
         ];
       };
     }
