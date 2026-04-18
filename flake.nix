@@ -47,14 +47,132 @@
       system:
       let
         pkgs = import nixpkgs { inherit system; config.allowUnfree = true; };
+        lolminerPkg = pkgs.callPackage ./packages/lolminer.nix { };
       in
       {
         packages = {
           xmrig = pkgs.callPackage ./packages/xmrig.nix { };
-          lolminer = pkgs.callPackage ./packages/lolminer.nix { };
+          lolminer = lolminerPkg;
 
           xmrig-alpine-image = pkgs.callPackage ./container-images/xmrig-alpine.nix { };
           xmrig-proxy-alpine-image = pkgs.callPackage ./container-images/xmrig-proxy-alpine.nix { };
+
+          lolminer-image = pkgs.dockerTools.buildImage {
+            name = "lolminer";
+            tag = "1.98a-nixos";
+            copyToRoot = pkgs.buildEnv {
+              name = "lolminer-root";
+              paths = [
+                lolminerPkg
+                pkgs.bash
+                pkgs.coreutils
+                pkgs.cacert
+              ];
+              pathsToLink = [
+                "/bin"
+                "/etc"
+                "/lib"
+              ];
+            };
+            config = {
+              Entrypoint = [ "/bin/lolMiner" ];
+              Cmd = [ ];
+              ExposedPorts = {
+                "4068/tcp" = { };
+              };
+              Env = [
+                "SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt"
+                "PATH=/bin"
+                "GPU_MAX_HEAP_SIZE=100"
+                "GPU_MAX_ALLOC_PERCENT=100"
+              ];
+            };
+          };
+
+          lolminer-amd-image =
+            let
+              glibc = pkgs.glibc;
+              rootFs = pkgs.runCommand "lolminer-amd-root" { } ''
+                mkdir -p $out/bin $out/etc $out/lib $out/lib64 $out/tmp $out/run/opengl-driver/lib $out/etc/OpenCL/vendors
+                cp ${lolminerPkg}/bin/.lolMiner-wrapped $out/bin/.lolMiner-wrapped
+                chmod +x $out/bin/.lolMiner-wrapped
+                echo '#! /bin/sh -e' > $out/bin/lolMiner
+                echo 'LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LD_LIBRARY_PATH:' >> $out/bin/lolMiner
+                echo 'LD_LIBRARY_PATH=/lib:$LD_LIBRARY_PATH' >> $out/bin/lolMiner
+                echo 'export LD_LIBRARY_PATH' >> $out/bin/lolMiner
+                echo 'exec /bin/.lolMiner-wrapped "$@"' >> $out/bin/lolMiner
+                chmod +x $out/bin/lolMiner
+                for pkg in ${pkgs.bash} ${pkgs.coreutils}; do
+                  if [ -d "$pkg/bin" ]; then
+                    for bin in $pkg/bin/*; do
+                      [ -e "$bin" ] && ln -sf "$bin" $out/bin/
+                    done
+                  fi
+                  if [ -d "$pkg/lib" ]; then
+                    cp -rL "$pkg/lib"/* $out/lib/ || echo "Warning: some libs from $pkg failed to copy"
+                  fi
+                done
+                mkdir -p $out/etc/ssl/certs
+                ln -sf ${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt $out/etc/ssl/certs/
+                for pkg in ${pkgs.rocmPackages.clr} ${pkgs.rocmPackages.clr.icd} ${pkgs.mesa.opencl}; do
+                  if [ -d "$pkg/lib" ]; then
+                    cp -rL "$pkg/lib"/* $out/lib/ || echo "Warning: some libs from $pkg failed to copy"
+                  fi
+                  if [ -d "$pkg/lib" ]; then
+                    cp -rL "$pkg/lib"/* $out/run/opengl-driver/lib/ || echo "Warning: some libs from $pkg failed to copy"
+                  fi
+                  if [ -d "$pkg/etc" ]; then
+                    cp -r $pkg/etc/* $out/etc/ || echo "Warning: some etc files from $pkg failed to copy"
+                  fi
+                done
+                rm -f $out/etc/OpenCL/vendors/rusticl.icd
+                cp -rL ${glibc}/lib/* $out/lib/ || echo "Warning: some glibc libs failed to copy"
+                mkdir -p $out/lib64
+                cp -rL ${glibc}/lib/* $out/lib64/ || echo "Warning: some glibc libs failed to copy to lib64"
+                rm -f $out/etc/OpenCL/vendors/amdocl64.icd
+                echo "/lib/libamdocl64.so" > $out/etc/OpenCL/vendors/amdocl64.icd
+              '';
+            in
+            pkgs.dockerTools.buildImage {
+              name = "lolminer-amd";
+              tag = "1.98a-nixos";
+              copyToRoot = rootFs;
+              config = {
+                Entrypoint = [ "/bin/lolMiner" ];
+                Cmd = [ ];
+                ExposedPorts = {
+                  "4069/tcp" = { };
+                };
+                Env = [
+                  "SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt"
+                  "OCL_ICD_VENDORS=/etc/OpenCL/vendors"
+                  "LD_LIBRARY_PATH=/lib"
+                  "GPU_MAX_HEAP_SIZE=100"
+                  "GPU_MAX_ALLOC_PERCENT=100"
+                ];
+                Labels = {
+                  "version" = "1.98a";
+                  "description" = "lolMiner NixOS container with AMD OpenCL support";
+                };
+              };
+            };
+
+          xmrig-nixos-image = pkgs.dockerTools.buildLayeredImage {
+            name = "xmrig-nixos";
+            tag = "latest";
+            contents = [
+              pkgs.xmrig
+              pkgs.bash
+              pkgs.coreutils
+            ];
+            config = {
+              Entrypoint = [ "${pkgs.xmrig}/bin/xmrig" ];
+              Env = [ "PATH=/bin" ];
+              Labels = {
+                "description" = "XMRig NixOS container with GLIBC compatibility";
+              };
+            };
+          };
 
           gpu-proxy-cpp = pkgs.stdenv.mkDerivation rec {
             pname = "gpu-proxy-cpp";
