@@ -11,7 +11,6 @@ let
   # Toggle between miner and llama on the 3090.
   # Scales one down, waits for pod termination, scales the other up.
   toggle-3090 = pkgs.writeShellScriptBin "toggle-3090-miner" ''
-    #!/usr/bin/env bash
     set -euo pipefail
     export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
@@ -96,7 +95,6 @@ let
 
   # Status checker: reports which workload is active on the 3090
   status-3090 = pkgs.writeShellScriptBin "3090-status" ''
-    #!/usr/bin/env bash
     set -euo pipefail
     export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
