@@ -208,7 +208,22 @@ in
           ''}
           wait
 
-            ${pkgs.python3}/bin/python3 ${httpServerScript} ${toString cfg.port} "$METRICS_FILE"
+          ${pkgs.python3}/bin/python3 ${httpServerScript} ${toString cfg.port} "$METRICS_FILE" &
+          HTTP_PID=$!
+
+          while true; do
+            > "$METRICS_FILE"
+
+            ${lib.optionalString (hostConfig ? lolminerPort) ''
+              fetch_lolminer ${toString (hostConfig.lolminerPort or 4068)} "nvidia" &
+            ''}
+            ${lib.optionalString (hostConfig ? lolminerAmdPort) ''
+              fetch_lolminer ${toString (hostConfig.lolminerAmdPort or 4069)} "amd" &
+            ''}
+            ${lib.optionalString (hostConfig ? xmrigPort) ''
+              fetch_xmrig ${toString hostConfig.xmrigPort} &
+            ''}
+            wait
 
             sleep "$INTERVAL_SECONDS"
           done
