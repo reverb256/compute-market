@@ -208,25 +208,33 @@ in
           ''}
           wait || true
 
-          ${pkgs.python3}/bin/python3 ${httpServerScript} ${toString cfg.port} "$METRICS_FILE" &
-          HTTP_PID=$!
+            ${pkgs.python3}/bin/python3 ${httpServerScript} ${toString cfg.port} "$METRICS_FILE" &
+            HTTP_PID=$!
 
-          while true; do
-            > "$METRICS_FILE"
+            while true; do
+              > "$METRICS_FILE"
 
-            ${lib.optionalString (hostConfig ? lolminerPort) ''
-              fetch_lolminer ${toString (hostConfig.lolminerPort or 4068)} "nvidia" &
-            ''}
-            ${lib.optionalString (hostConfig ? lolminerAmdPort) ''
-              fetch_lolminer ${toString (hostConfig.lolminerAmdPort or 4069)} "amd" &
-            ''}
-            ${lib.optionalString (hostConfig ? xmrigPort) ''
-              fetch_xmrig ${toString hostConfig.xmrigPort} &
-            ''}
-            wait || true
+              # Start fetch processes in background and store their PIDs
+              FETCH_PIDS=""
 
-            sleep "$INTERVAL_SECONDS"
-          done
+              ${lib.optionalString (hostConfig ? lolminerPort) ''
+                fetch_lolminer ${toString (hostConfig.lolminerPort or 4068)} "nvidia" &
+                FETCH_PIDS="$FETCH_PIDS $!"
+              ''}
+              ${lib.optionalString (hostConfig ? lolminerAmdPort) ''
+                fetch_lolminer ${toString (hostConfig.lolminerAmdPort or 4069)} "amd" &
+                FETCH_PIDS="$FETCH_PIDS $!"
+              ''}
+              ${lib.optionalString (hostConfig ? xmrigPort) ''
+                fetch_xmrig ${toString hostConfig.xmrigPort} &
+                FETCH_PIDS="$FETCH_PIDS $!"
+              ''}
+
+              # Wait only for fetch processes to complete, not the HTTP server
+              wait $FETCH_PIDS || true
+
+              sleep "$INTERVAL_SECONDS"
+            done
         '';
         Path = [
           pkgs.curl
