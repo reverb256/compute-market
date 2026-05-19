@@ -39,8 +39,8 @@ let
         def log_message(self, format, *args):
             pass
 
-    socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("", PORT), MetricsHandler) as httpd:
+    socketserver.ThreadingTCPServer.allow_reuse_address = True
+    with socketserver.ThreadingTCPServer(("", PORT), MetricsHandler) as httpd:
         httpd.serve_forever()
   '';
 
@@ -206,7 +206,7 @@ in
           ${lib.optionalString (hostConfig ? xmrigPort) ''
             fetch_xmrig ${toString hostConfig.xmrigPort} &
           ''}
-          wait
+          wait || true
 
           ${pkgs.python3}/bin/python3 ${httpServerScript} ${toString cfg.port} "$METRICS_FILE" &
           HTTP_PID=$!
@@ -223,7 +223,7 @@ in
             ${lib.optionalString (hostConfig ? xmrigPort) ''
               fetch_xmrig ${toString hostConfig.xmrigPort} &
             ''}
-            wait
+            wait || true
 
             sleep "$INTERVAL_SECONDS"
           done
